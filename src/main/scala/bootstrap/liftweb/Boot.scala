@@ -14,6 +14,9 @@ import ch.qos.logback.classic.joran.JoranConfigurator
 import java.io.{ByteArrayInputStream, InputStream}
 import whatcheer.routes.MainRoutes
 import whatcheer.models.Actor
+import whatcheer.models.Relationship
+import whatcheer.models.TheObject
+import whatcheer.models.Activity
 
 /** A class that's instantiated early and run. It allows the application to
   * modify lift's environment
@@ -62,7 +65,7 @@ printf("Hello World!")
       DB.defineConnectionManager(mapper.DefaultConnectionIdentifier, vendor)
     }
 
-    Schemifier.schemify(true, Schemifier.infoF _, Actor)
+    Schemifier.schemify(true, Schemifier.infoF _, Actor, Relationship, TheObject, Activity)
 
     LiftRules.supplementalHeaders.default.set(() => Nil)
     // don't polute the logs
