@@ -3,7 +3,7 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "whatcheer"
 ThisBuild / organizationName := "whatcheer"
 
-name := "server"
+name := "netop"
 scalacOptions += "-deprecation"
 
 scalacOptions += "-unchecked"
