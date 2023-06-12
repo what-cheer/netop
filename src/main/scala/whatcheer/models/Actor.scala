@@ -22,6 +22,7 @@ import java.net.URL
 import net.liftweb.mapper.MappedText
 import net.liftweb.util.Helpers
 import java.security.KeyPairGenerator
+import net.liftweb.util.Props
 
 object Actor extends Actor with LongKeyedMetaMapper[Actor] {
   // Logger must be lazy, since we cannot instantiate until after boot is complete
@@ -40,9 +41,10 @@ object Actor extends Actor with LongKeyedMetaMapper[Actor] {
 
   override def afterSchemifier: Unit = {
     super.afterSchemifier
-    if (findActor("dpp").isEmpty) {
-      Actor.create.username("dpp").save
-      logger.info("Added user dpp")
+
+    if (Props.testMode && findActor("test").isEmpty) {
+      Actor.createActor("test", "Test User", "User for testing", Empty).save
+      logger.info("Added user 'test'")
     }
   }
 

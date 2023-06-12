@@ -1,11 +1,17 @@
 # What Cheer Netop
 
-> In a canoe with several others, Roger scouted the area across the Seekonk River. They spotted a group of Narragansett on a large rock, known afterwards as Slate Rock, along the western shore of the Seekonk River. As they approached the Narragansett greeted them by calling out: “What Cheer Netop!” This greeting is a combination of English and Narragansett languages. ‘What cheer’ was an informal common English greeting of the day, short for ‘what cheery news do you bring’ and today’s equivalent of “what’s up?’’ “Netop” is the Narragansett word for friend.
-> [Roger Williams: Founding Providence](https://www.nps.gov/rowi/learn/historyculture/foundingprovidence.htm)
-
-What Cheer is an MIT licensed implementation of [Fediverse](https://en.wikipedia.org/wiki/Fediverse)/[ActivityPub](https://en.wikipedia.org/wiki/ActivityPub)
+What Cheer Netop is an MIT licensed implementation of [Fediverse](https://en.wikipedia.org/wiki/Fediverse)/[ActivityPub](https://en.wikipedia.org/wiki/ActivityPub)
 in [Scala](https://www.scala-lang.org/) and [Lift](https://liftweb.net) by
 [David Pollak](https://macaw.social/@dpp).
+
+
+> In a canoe with several others, Roger scouted the area across the Seekonk River. They spotted a group of Narragansett on a large rock, known afterwards as Slate Rock, along the western shore of the Seekonk River. As they approached the Narragansett greeted them by calling out: “What Cheer Netop!” This greeting is a combination of English and Narragansett languages. ‘What cheer’ was an informal common English greeting of the day, short for ‘what cheery news do you bring’ and today’s equivalent of “what’s up?’’ “Netop” is the Narragansett word for friend.
+>    
+> [Roger Williams: Founding Providence](https://www.nps.gov/rowi/learn/historyculture/foundingprovidence.htm)
+
+"What Cheer, Netop" also translates to "Hi, Neighbor!" This is a perfect embodiment of the Fediverse. Each federated instance is a neighbor (netop)
+to other Fediverse instances. They share a common language and say "Hi" and have lots of conversations with each other.
+
 
 The implementation is based on [ActivityPub-Express](https://github.com/immers-space/activitypub-express) which is also MIT licensed.
 
@@ -28,3 +34,21 @@ Right now, all discussion is via GitHub tickets.
 
 If you want to contribute, open a ticket, have a discussion, open
 a PR, etc.
+
+## Running
+
+Netop is a basic [LiftWeb](https://liftweb.net) application. It may be run in an app server or as a stand-alone
+UberJar.
+
+If running as a stand-alone UberJar specify the location of the properties file, set the `WHATCHEER_PROPS_FILE` environment
+variabel to point to the properties file.
+
+Properties:
+
+* `whatcheer.name`: The domain name of the server. default: `localhost`
+* `whatcheer.baseurl`: The base URL of the server. default: `http://localhost:8080`
+* `whatcheer.actorbase`: the base for "actor" related requests. For example `/u/test` default: `u`
+* `whatcheer.nodeinfouri`: the base for node info related request. default: `nodeinfo`
+* `whatcheer.name`: the name of this server implementation. default: `whatcheer`
+* `whatcheer.version`: the version of this server implementation. default: `0.1`
+* `whatcheer.openregistrations`: is the server open to new registrations? default: `false`

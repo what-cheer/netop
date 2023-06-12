@@ -8,6 +8,12 @@ scalacOptions += "-deprecation"
 
 scalacOptions += "-unchecked"
 
+// Test / fork := true
+
+val fo = ForkOptions().withEnvVars(envVars = Map("run.mode" -> "test"))
+
+Test / run / forkOptions := fo
+
 resolvers += "jitpack.io" at "https://jitpack.io"
 
 autoCompilerPlugins := true

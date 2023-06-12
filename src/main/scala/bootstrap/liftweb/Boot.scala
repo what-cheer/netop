@@ -17,13 +17,46 @@ import whatcheer.models.Actor
 import whatcheer.models.Relationship
 import whatcheer.models.TheObject
 import whatcheer.models.Activity
+import java.util.concurrent.atomic.AtomicBoolean
+import java.io.File
+import java.util.Properties
+import java.io.FileInputStream
+
+class Boot {
+  def booted_? = Boot.hasBooted_?.get()
+  def boot: Unit = Boot.boot
+}
 
 /** A class that's instantiated early and run. It allows the application to
   * modify lift's environment
   */
-class Boot {
+object Boot {
+  private val hasBooted_? = new AtomicBoolean(false)
+  def booted_? = hasBooted_?.get()
   def boot: Unit = {
-printf("Hello World!")
+
+    import java.util.{Map => JMap}
+
+    if (booted_?) return
+
+    // Add more property lookups for running in UberJar mode
+    System.getenv("WHATCHEER_PROPS_FILE") match {
+      case v if v != null =>
+        val fis = new FileInputStream(System.getenv("WHATCHEER_PROPS_FILE"))
+        val ret = new Properties
+
+        ret.load(fis)
+        fis.close()
+
+        val otherProps = Map(ret.entrySet.toArray.flatMap {
+          case s: JMap.Entry[_, _] =>
+            List((s.getKey.toString, s.getValue.toString))
+          case _ => Nil
+        }.toIndexedSeq: _*)
+
+        Props.prependProvider(otherProps)
+      case _ =>
+    }
 
     val xml =
       """
@@ -65,7 +98,14 @@ printf("Hello World!")
       DB.defineConnectionManager(mapper.DefaultConnectionIdentifier, vendor)
     }
 
-    Schemifier.schemify(true, Schemifier.infoF _, Actor, Relationship, TheObject, Activity)
+    Schemifier.schemify(
+      true,
+      Schemifier.infoF _,
+      Actor,
+      Relationship,
+      TheObject,
+      Activity
+    )
 
     LiftRules.supplementalHeaders.default.set(() => Nil)
     // don't polute the logs
@@ -85,6 +125,8 @@ printf("Hello World!")
     S.addAround(DB.buildLoanWrapper())
 
     LiftRules.statelessDispatch.append(MainRoutes)
+
+    hasBooted_?.set(true)
 
   }
 }
