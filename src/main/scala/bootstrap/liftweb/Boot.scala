@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.io.File
 import java.util.Properties
 import java.io.FileInputStream
+import whatcheer.utils.JsonLD
 
 class Boot {
   def booted_? = Boot.hasBooted_?.get()
@@ -83,12 +84,16 @@ object Boot {
       configurator.doConfigure(is)
     })
 
+    // ensure these are loaded
+    JsonLD.ActivityStreamJson
+    JsonLD.SecurityJson
+
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor =
         new StandardDBVendor(
           Props.get("db.driver") openOr "org.h2.Driver",
           Props.get("db.url") openOr
-            "jdbc:h2:./lift_proto.db;AUTO_SERVER=TRUE",
+            "jdbc:h2:mem:development",
           Props.get("db.user"),
           Props.get("db.password")
         )

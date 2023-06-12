@@ -1,0 +1,5 @@
+
+db.user=sa
+db.password=
+db.url=jdbc:h2:mem:development
+db.driver=org.h2.Driver

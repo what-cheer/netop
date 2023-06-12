@@ -7,12 +7,12 @@ import net.liftweb.common.Full
 import net.liftweb.common.ParamFailure
 import net.liftweb.json.JsonAST
 
-/**
-  * Test that the web finger code is working
-  *
+/** Test that the web finger code is working
   */
 class WebFingerTest extends munit.FunSuite {
   Boot.boot
+
+  val testActor = Actor.findActor("test")
 
   test("Get Test Actor") {
     assert(Props.testMode)
@@ -28,7 +28,7 @@ class WebFingerTest extends munit.FunSuite {
     assertEquals(json \ "subject", JsonAST.JString("acct:test@localhost"))
     assertEquals(
       (json \ "links")(0) \ "href",
-      JsonAST.JString("http://localhost:8080/u/test")
+      JsonAST.JString(Actor.buildActorIRI(testActor.openOrThrowException("Already tested")))
     )
   }
 

@@ -7,8 +7,19 @@ import net.liftweb.util.Helpers
 import java.util.HashMap
 import com.github.jsonldjava.core.JsonLdOptions
 import com.github.jsonldjava.core.JsonLdProcessor
+import net.liftweb.json.JsonAST
+import net.liftweb.json.JsonAST.JObject
 
 object JsonLD {
+  private def loadFromResources(name: String): Object = {
+    val stream = this.getClass().getResourceAsStream(name)
+    val ret = JsonUtils.fromInputStream(stream)
+    stream.close()
+    ret
+  }
+
+  lazy val ActivityStreamJson = loadFromResources("/json/as.json")
+  lazy val SecurityJson = loadFromResources("/json/security.json")
 
   /** Attempt to parse a byte array into a JsonLD structure
     *
@@ -23,10 +34,9 @@ object JsonLD {
     jsonObject.flatMap(parseJsonToJsonLD _)
   }
 
-  /**
-    * Parse a holder of a an `Object` representing a JSON parsed
-    * input into a JsonLDHolder... which holds an `Object` that
-    * is likely a map of a compact JsonLD thing
+  /** Parse a holder of a an `Object` representing a JSON parsed input into a
+    * JsonLDHolder... which holds an `Object` that is likely a map of a compact
+    * JsonLD thing
     *
     * @param in
     * @return
@@ -43,18 +53,50 @@ object JsonLD {
       JsonLDHolder(graph.get(0))
     }
   }
+
+  def prependDefaultContext(obj: JsonAST.JValue): JsonAST.JObject = {
+    obj match {
+      // context already defined
+      case ret @ JObject(first :: _) if first.name == "@context" => ret
+
+      // prepend context
+      case JObject(obj) =>
+        JObject(
+          JsonAST.JField(
+            "@context",
+            JsonAST.JArray(
+              List(
+                JsonAST.JString("https://www.w3.org/ns/activitystreams"),
+                JsonAST.JString("https://w3id.org/security/v1")
+              )
+            )
+          ) :: obj
+        )
+
+      // create a new JObject with context
+      case jv => JObject(
+          JsonAST.JField(
+            "@context",
+            JsonAST.JArray(
+              List(
+                JsonAST.JString("https://www.w3.org/ns/activitystreams"),
+                JsonAST.JString("https://w3id.org/security/v1")
+              )
+            )
+          ) :: JsonAST.JField("value", jv) :: Nil
+        )
+    }
+  }
 }
 
-/**
-  * A thin wrapper around a parsed JSON data structure that's been passed
-  * throw JsonLD "compact"
+/** A thin wrapper around a parsed JSON data structure that's been passed throw
+  * JsonLD "compact"
   *
   * @param jsonld
   */
 case class JsonLDHolder(jsonld: Object)
 
-/**
-  * A thin wrapper around an object that represents JSON parsed data
+/** A thin wrapper around an object that represents JSON parsed data
   *
   * @param json
   */

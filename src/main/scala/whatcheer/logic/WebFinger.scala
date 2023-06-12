@@ -54,7 +54,7 @@ object WebFinger {
     } yield ("subject" -> myResource) ~ ("links" -> List(
       ("rel" -> "self") ~
         ("type" -> "application/activity+json") ~
-        ("href" -> actor.buildActorIRI())
+        ("href" -> Actor.buildActorIRI(actor))
     ))
   }
 

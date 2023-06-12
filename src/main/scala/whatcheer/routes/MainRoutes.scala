@@ -17,13 +17,22 @@ import net.liftweb.json.JsonDSL._
 
 import whatcheer.models._
 import whatcheer.logic._
+import whatcheer.utils.JsonLD
 
 object MainRoutes extends RestHelper {
   serve {
-    case Constants.ActorBaseURI :: Actor(actor) :: "inbox" :: Nil Get _ =>
+    // case Constants.Ac
+    case Constants.ActorBaseURI :: Actor(actor) ::
+        Constants.ActorBaseInboxURI :: Nil Get _ =>
       null // app.route(routes.inbox)get(apex.net.inbox.get)
-    case Constants.ActorBaseURI :: Actor(actor) :: "inbox" :: Nil Post _ =>
+    case Constants.ActorBaseURI ::
+        Actor(actor) ::
+        Constants.ActorBaseInboxURI :: Nil Post _ =>
       null // post(apex.net.inbox.post)
+
+    case Constants.ActorBaseURI :: Actor(actor) :: Nil Get req if Validation.validateJsonLD(req).isDefined =>
+      JsonLD.prependDefaultContext(actor.json)
+
     case ".well-known" :: "webfinger" :: Nil Get req =>
       WebFinger.service(req.param("resource"))
 
@@ -32,8 +41,9 @@ object MainRoutes extends RestHelper {
         ("rel" -> "http://nodeinfo.diaspora.software/ns/schema/2.1") ~ ("href" -> f"${Constants.BaseURL}/${Constants.NodeInfoURI}/2.1"),
         ("rel" -> "http://nodeinfo.diaspora.software/ns/schema/2.0") ~ ("href" -> f"${Constants.BaseURL}/${Constants.NodeInfoURI}/2.0")
       )) ~ (".ignore" -> "me")
-    
-    case Constants.NodeInfoURI :: version :: Nil Get _ => NodeInfo.getNodeInfo(version)
+
+    case Constants.NodeInfoURI :: version :: Nil Get _ =>
+      NodeInfo.getNodeInfo(version)
 
 //   .
 //   .post(apex.net.inbox.post)

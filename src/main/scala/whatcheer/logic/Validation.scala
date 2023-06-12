@@ -12,12 +12,12 @@ import net.liftweb.common.ParamFailure
 
 object Validation {
   def validateJsonLD(reqProxy: ReqProxy): Box[(Boolean, Box[JsonLDHolder])] = {
-    val jld = reqProxy.acceptsList().filter(c => c.theType == "application" && (c.subtype == "ld+json" || c.subtype == "activity+json"))
-    val textHtml = reqProxy.acceptsList().filter(c => c.theType == "text" && c.subtype == "html")
-    val isJsonLdGet = reqProxy.method() == "GET" && textHtml.length == 0 && jld.length > 0
-    val isJsonLdProxy = reqProxy.method() == "POST" && jld.length > 0 && reqProxy.contentType() == Full(Constants.formUrlType)
+    val jld = reqProxy.acceptsList.filter(c => c.theType == "application" && (c.subtype == "ld+json" || c.subtype == "activity+json"))
+    val textHtml = reqProxy.acceptsList.filter(c => c.theType == "text" && c.subtype == "html")
+    val isJsonLdGet = reqProxy.method == "GET" && textHtml.length == 0 && jld.length > 0
+    val isJsonLdProxy = reqProxy.method == "POST" && jld.length > 0 && reqProxy.contentType == Full(Constants.formUrlType)
     if (isJsonLdGet || isJsonLdProxy) Full((true, Empty))
-    else if (reqProxy.method() == "POST" && reqProxy.contentType() == Full(Constants.jsonldOutgoingType(0))) {
+    else if (reqProxy.method == "POST" && reqProxy.contentType == Full(Constants.jsonldOutgoingType(0))) {
         val holder = reqProxy.body.flatMap(JsonLD.parseAsJsonLD _)
         holder match {
             case Full(_) => Full((true, holder))
@@ -32,19 +32,19 @@ object Validation {
 }
 
 trait ReqProxy {
-    def method(): String
-    def acceptsList(): List[ContentType]
-    def contentType(): Box[String]
+    def method: String
+    def acceptsList: List[ContentType]
+    def contentType: Box[String]
     def body: Box[Array[Byte]]
 }
 
 object ReqProxy {
-    implicit def fromRequest(r: Req): ReqProxy = new ReqProxy {
-        def method(): String = r.method()
-        def acceptsList(): List[ContentType] = r.weightedAccept
+    implicit def fromRequest(theRequest: Req): ReqProxy = new ReqProxy {
+        lazy val method: String = theRequest.requestType.method
+        lazy val acceptsList: List[ContentType] = theRequest.weightedAccept
 
-        def contentType(): Box[String] = r.contentType
+        lazy val contentType: Box[String] = theRequest.contentType
 
-        lazy val body = r.body
+        lazy val body = theRequest.body
     }
 }
