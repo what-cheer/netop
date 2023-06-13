@@ -13,10 +13,7 @@ import ch.qos.logback.classic.{Level, LoggerContext}
 import ch.qos.logback.classic.joran.JoranConfigurator
 import java.io.{ByteArrayInputStream, InputStream}
 import whatcheer.routes.MainRoutes
-import whatcheer.models.Actor
-import whatcheer.models.Relationship
-import whatcheer.models.TheObject
-import whatcheer.models.Activity
+import whatcheer.schemas._
 import java.util.concurrent.atomic.AtomicBoolean
 import java.io.File
 import java.util.Properties
@@ -106,10 +103,9 @@ object Boot {
     Schemifier.schemify(
       true,
       Schemifier.infoF _,
-      Actor,
-      Relationship,
-      TheObject,
-      Activity
+      Actor, ActorFollowing, Objects, InboxObjects, OutboxObjects,
+      ActorNotifications, ActorFavourites, ActorReblogs,
+      ActorReplies, Clients, Subscriptions, 
     )
 
     LiftRules.supplementalHeaders.default.set(() => Nil)
