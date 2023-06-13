@@ -6,3 +6,5 @@ target/
 project/project/metals.sbt
 project/metals.sbt
 lift_*.db
+localdev.props
+dev_pg_data/*
