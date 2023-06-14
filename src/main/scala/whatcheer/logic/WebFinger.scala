@@ -4,7 +4,8 @@ import net.liftweb.common._
 import scala.util.matching.Regex
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
-import whatcheer.models.Actor
+import whatcheer.schemas.Actor
+
 
 /**
   * Implement the logic behind WebFinger. The conversion of the values
@@ -27,8 +28,9 @@ object WebFinger {
   def parse(resource: Box[String]): Box[String] = {
     resource match {
       case Full(acctPattern(user, host)) =>
-        if (host.toLowerCase() == Constants.Hostname)
-          Full(user)
+        val hostLower = host.toLowerCase()
+        if ( Constants.Hostnames.contains(hostLower))
+          Full(f"${user.toLowerCase()}@${hostLower}")
         else
           ParamFailure("Requested User is not from this domain", 400)
       case _ =>
@@ -49,7 +51,7 @@ object WebFinger {
     for {
       target <- WebFinger.parse(resource)
       myResource <- resource ?~ "failed to include resource" ~> 400
-      actor <- Actor.targetActor(target) 
+      actor <- Actor.findByKey(target) ?~ f"User ${resource} not found" ~> 404
 
     } yield ("subject" -> myResource) ~ ("links" -> List(
       ("rel" -> "self") ~

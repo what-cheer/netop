@@ -28,6 +28,7 @@ import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 import whatcheer.utils.CryptoUtil
 
+/*
 object Actor extends Actor with LongKeyedMetaMapper[Actor] {
   // Logger must be lazy, since we cannot instantiate until after boot is complete
   private lazy val logger = Logger(classOf[Actor])
@@ -43,7 +44,7 @@ object Actor extends Actor with LongKeyedMetaMapper[Actor] {
       case x     => x
     }
 
-    def unapply(key: String): Option[Actor] = findActor(key)
+  def unapply(key: String): Option[Actor] = findActor(key)
 
   override def afterSchemifier: Unit = {
     super.afterSchemifier
@@ -70,7 +71,9 @@ object Actor extends Actor with LongKeyedMetaMapper[Actor] {
       .icon(icon.map(i => i.toExternalForm()).openOr(""))
       .actorType(actorType)
       .pubKey(CryptoUtil.keyBytesToPrettyText(keyPair.getPublic().getEncoded()))
-      .privKey(CryptoUtil.keyBytesToPrettyText(keyPair.getPrivate().getEncoded()))
+      .privKey(
+        CryptoUtil.keyBytesToPrettyText(keyPair.getPrivate().getEncoded())
+      )
   }
 
   def buildActorIRI(actor: Actor): String =
@@ -82,13 +85,13 @@ object Actor extends Actor with LongKeyedMetaMapper[Actor] {
   def buildOutboxIRI(actor: Actor): String =
     f"${Constants.BaseURL}/${Constants.ActorBaseURI}/${URLEncoder.encode(actor.username.get, StandardCharsets.UTF_8.toString())}/${Constants.ActorBaseOutboxURI}"
 
-      def buildFollowersIRI(actor: Actor): String =
+  def buildFollowersIRI(actor: Actor): String =
     f"${Constants.BaseURL}/${Constants.ActorBaseURI}/${URLEncoder.encode(actor.username.get, StandardCharsets.UTF_8.toString())}/${Constants.ActorBaseFollowersURI}"
 
-      def buildFollowingIRI(actor: Actor): String =
+  def buildFollowingIRI(actor: Actor): String =
     f"${Constants.BaseURL}/${Constants.ActorBaseURI}/${URLEncoder.encode(actor.username.get, StandardCharsets.UTF_8.toString())}/${Constants.ActorBaseFollowingURI}"
 
-      def buildLikedIRI(actor: Actor): String =
+  def buildLikedIRI(actor: Actor): String =
     f"${Constants.BaseURL}/${Constants.ActorBaseURI}/${URLEncoder.encode(actor.username.get, StandardCharsets.UTF_8.toString())}/${Constants.ActorBaseLikedURI}"
 }
 
@@ -129,8 +132,7 @@ class Actor
         ("proxyUrl" -> f"${Constants.BaseURL}/${Constants.ProxyEndpoint}"))
   }
 
-
-
   def tombstoned_? : Boolean = tombstonedAt.get.getTime() != 0L
 
 }
+*/

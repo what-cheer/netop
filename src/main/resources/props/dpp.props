@@ -2,5 +2,5 @@ db.user=postgres
 db.password=howdy
 db.url=jdbc:postgresql://localhost:15432/postgres
 db.driver=org.postgresql.Driver
-whatcheer.name=dev.whatcheer.social
-whatcheer.baseurl=https://dev.whatcheer.social
+whatcheer.names=["dev.whatcheer.social"]
+# whatcheer.baseurl=https://dev.whatcheer.social

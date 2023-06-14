@@ -27,6 +27,7 @@ import net.liftweb.mapper.MappedLongForeignKey
 import net.liftweb.mapper.MappedEnum
 import net.liftweb.mapper.Index
 
+/*
 object Relationship
     extends Relationship
     with LongKeyedMetaMapper[Relationship] {
@@ -69,3 +70,4 @@ object RelationshipTypes extends Enumeration {
   val Following, Follower, Liked, Bookmark, Share, Likes, Blocked, Rejected =
     Value
 }
+*/

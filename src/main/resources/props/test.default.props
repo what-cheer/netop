@@ -3,6 +3,6 @@ db.user=postgres
 db.password=howdy
 db.url=jdbc:postgresql://localhost:25432/postgres
 db.driver=org.postgresql.Driver
-whatcheer.name=localhost
+whatcheer.names=localhost
 whatcheer.baseurl=http://localhost:8080
 

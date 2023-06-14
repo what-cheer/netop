@@ -15,9 +15,9 @@ import net.liftweb.http.JsonResponse
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import whatcheer.models._
 import whatcheer.logic._
 import whatcheer.utils.JsonLD
+import whatcheer.schemas.Actor
 
 object MainRoutes extends RestHelper {
   serve {
@@ -36,11 +36,11 @@ object MainRoutes extends RestHelper {
     case ".well-known" :: "webfinger" :: Nil Get req =>
       WebFinger.service(req.param("resource"))
 
-    case ".well-known" :: "nodeinfo" :: Nil Get _ =>
+    case ".well-known" :: "nodeinfo" :: Nil Get req =>
       ("links" -> List(
-        ("rel" -> "http://nodeinfo.diaspora.software/ns/schema/2.1") ~ ("href" -> f"${Constants.BaseURL}/${Constants.NodeInfoURI}/2.1"),
-        ("rel" -> "http://nodeinfo.diaspora.software/ns/schema/2.0") ~ ("href" -> f"${Constants.BaseURL}/${Constants.NodeInfoURI}/2.0")
-      )) ~ (".ignore" -> "me")
+        ("rel" -> "http://nodeinfo.diaspora.software/ns/schema/2.1") ~ ("href" -> f"https://${req.header("host").openOr(Constants.Hostnames.head)}/${Constants.NodeInfoURI}/2.1"),
+        ("rel" -> "http://nodeinfo.diaspora.software/ns/schema/2.0") ~ ("href" -> f"https://${req.header("host").openOr(Constants.Hostnames.head)}/${Constants.NodeInfoURI}/2.0")
+      )) ~ (".server_type" -> "What Cheer, Netop")
 
     case Constants.NodeInfoURI :: version :: Nil Get _ =>
       NodeInfo.getNodeInfo(version)

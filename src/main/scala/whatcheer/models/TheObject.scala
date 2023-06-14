@@ -29,14 +29,20 @@ import net.liftweb.mapper.Index
 import net.liftweb.json.JsonAST
 import net.liftweb.mapper.DBIndexed
 import net.liftweb.mapper.Mapper
-  import net.liftweb.json._
-  import net.liftweb.json.JsonDSL._
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
+/*
 object TheObject extends TheObject with LongKeyedMetaMapper[TheObject] {
   // Logger must be lazy, since we cannot instantiate until after boot is complete
   private lazy val logger = Logger(classOf[TheObject])
 
-  def createObj(theType: ObjectTypes.Value, value: JValue, to: Box[JValue], attributedTo: Box[Actor]): TheObject = {
+  def createObj(
+      theType: ObjectTypes.Value,
+      value: JValue,
+      to: Box[JValue],
+      attributedTo: Box[Actor]
+  ): TheObject = {
     val ret = TheObject.create
     ret.index.set(Helpers.nextFuncName)
     ret.objectValue.setJson(value)
@@ -45,7 +51,8 @@ object TheObject extends TheObject with LongKeyedMetaMapper[TheObject] {
     ret
   }
 
-  def toIRI(obj: TheObject): String = f"${Constants.BaseURL}/${Constants.ObjectBaseURI}/${URLEncoder.encode(obj.index.get, StandardCharsets.UTF_8.toString())}"
+  def toIRI(obj: TheObject): String = f"${Constants.BaseURL}/${Constants.ObjectBaseURI}/${URLEncoder
+      .encode(obj.index.get, StandardCharsets.UTF_8.toString())}"
 }
 
 class TheObject extends LongKeyedMapper[TheObject] with IdPK with CreatedTrait {
@@ -59,7 +66,6 @@ class TheObject extends LongKeyedMapper[TheObject] with IdPK with CreatedTrait {
   object objectValue extends MappedJson(this)
   object to extends MappedJson(this)
   object attributedTo extends MappedLongForeignKey(this, Actor)
-
 
   //  lazy val json: JsonAST.JValue = {
   //   val theId = Actor.buildActorIRI(this)
@@ -85,12 +91,14 @@ object ObjectTypes extends Enumeration {
     Value
 }
 
-abstract class MappedJson[T<:Mapper[T]](theFieldOwner: T) extends MappedText[T](theFieldOwner) {
+abstract class MappedJson[T <: Mapper[T]](theFieldOwner: T)
+    extends MappedText[T](theFieldOwner) {
   def getJson(): Box[JsonAST.JValue] = parseOpt(this.get)
 
   def setJson(jv: JsonAST.JValue): T = {
     this.apply(compactRender(jv))
   }
 
-  def apply(jv: JsonAST.JValue): T = {setJson(jv)}
+  def apply(jv: JsonAST.JValue): T = { setJson(jv) }
 }
+*/

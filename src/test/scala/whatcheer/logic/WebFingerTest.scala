@@ -1,22 +1,22 @@
 package whatcheer.logic
 
-import whatcheer.models.Actor
 import net.liftweb.util.Props
 import bootstrap.liftweb.Boot
 import net.liftweb.common.Full
 import net.liftweb.common.ParamFailure
 import net.liftweb.json.JsonAST
+import whatcheer.schemas.Actor
 
 /** Test that the web finger code is working
   */
 class WebFingerTest extends munit.FunSuite {
   Boot.boot
 
-  val testActor = Actor.findActor("test")
+  val testActor = Actor.findByKey("test@localhost")
 
   test("Get Test Actor") {
     assert(Props.testMode)
-    val testActor = Actor.findActor("test")
+    val testActor = Actor.findByKey("test@localhost")
 
     assert(testActor.isDefined)
   }

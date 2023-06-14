@@ -28,6 +28,7 @@ import net.liftweb.mapper.MappedEnum
 import net.liftweb.mapper.Index
 import net.liftweb.json.JsonAST
 
+/*
 object Activity
     extends Activity
     with LongKeyedMetaMapper[Activity] {
@@ -58,4 +59,4 @@ object ActivityTypes extends Enumeration {
 
   val Create, Follow, Like, Announce, Block, Update, Arrive =
     Value
-}
+}*/

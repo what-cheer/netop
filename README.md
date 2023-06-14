@@ -46,8 +46,7 @@ variabel to point to the properties file.
 
 Properties:
 
-* `whatcheer.name`: The domain name of the server. default: `localhost`
-* `whatcheer.baseurl`: The base URL of the server. default: `http://localhost:8080`
+* `whatcheer.names`: The domain names hosted by this server as a JSON Array of Strings. default: `["localhost"]`
 * `whatcheer.objectbase`: the base for "object" related requests. For example `/o/:id` default: `o`
 * `whatcheer.streambase`: the base for "stream" related requests. For example `/s/:id` default: `s`
 * `whatcheer.actorbase`: the base for "actor" related requests. For example `/u/:actor` default: `u`
@@ -63,3 +62,9 @@ Properties:
 * `whatcheer.name`: the name of this server implementation. default: `whatcheer`
 * `whatcheer.version`: the version of this server implementation. default: `0.1`
 * `whatcheer.openregistrations`: is the server open to new registrations? default: `false`
+
+## Upstream Source
+
+This work derives some code from:
+* https://github.com/cloudflare/wildebeest/
+* https://github.com/immers-space/activitypub-express

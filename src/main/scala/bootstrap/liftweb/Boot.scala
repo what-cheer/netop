@@ -31,7 +31,7 @@ class Boot {
 object Boot {
   private val hasBooted_? = new AtomicBoolean(false)
   def booted_? = hasBooted_?.get()
-  def boot: Unit = {
+  def boot: Unit = this.synchronized {
 
     import java.util.{Map => JMap}
 

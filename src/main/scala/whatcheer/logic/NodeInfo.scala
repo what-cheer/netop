@@ -7,7 +7,7 @@ import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 import net.liftweb.common.ParamFailure
 import net.liftweb.common.Full
-import whatcheer.models.Actor
+import whatcheer.schemas.Actor
 
 object NodeInfo {
   def generateNodeInfo(version: String): JsonAST.JValue = {

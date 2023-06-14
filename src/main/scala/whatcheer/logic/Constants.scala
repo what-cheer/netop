@@ -3,14 +3,16 @@ package whatcheer.logic
 import net.liftweb.util.Props
 import java.net.URLDecoder
 import java.net.URLEncoder
-import whatcheer.models.Actor
 import java.nio.charset.StandardCharsets
+import whatcheer.utils.MiscUtil
 
 object Constants {
-  lazy val Hostname: String =
-    Props.get("whatcheer.name", "localhost").toLowerCase()
-  lazy val BaseURL: String =
-    Props.get("whatcheer.baseurl", "http://localhost:8080")
+  lazy val Hostnames: Set[String] =
+    MiscUtil.stringToSet(
+      Props.get("whatcheer.names", """["localhost"]""").toLowerCase()
+    )
+  // lazy val BaseURL: String =
+  //   Props.get("whatcheer.baseurl", "http://localhost:8080")
   lazy val ActorBaseURI: String = Props.get("whatcheer.actorbase", "u")
   lazy val ObjectBaseURI: String = Props.get("whatcheer.objectbase", "o")
   lazy val StreamBaseURI: String = Props.get("whatcheer.streambase", "s")

@@ -32,7 +32,6 @@ import net.liftweb.mapper.Mapper
 import net.liftweb.mapper.IndexedField
 import net.liftweb.mapper.KeyedMapper
 import net.liftweb.mapper.KeyedMetaMapper
-import whatcheer.models.MappedJson
 import net.liftweb.mapper.DBIndexed
 import net.liftweb.mapper.MappedStringForeignKey
 import net.liftweb.mapper.UniqueIndex
@@ -42,85 +41,66 @@ import net.liftweb.mapper.MappedField
 import net.liftweb.mapper.BaseIndex
 import net.liftweb.mapper.IdPK
 import net.liftweb.mapper.MetaMapper
+import net.liftweb.util.FieldError
+import scala.util.matching.Regex
+import net.liftweb.common.Failure
+import net.liftweb.mapper.MappedEnum
 
-object DBConsts {
-  def primaryKeyLen = 500
+object ActorClass extends Enumeration {
+  type ActorType = Value
+
+  val Person = Value(1, "person")
 }
 
-abstract class MappedStringIndex[T <: Mapper[T]](theOwner: T, len: Int)
-    extends MappedString[T](theOwner, len)
-    with IndexedField[String] {
 
-  // override def writePermission_? = false // not writable
 
-  override def dbIndexed_? = true
+// Schemas in this file are ports from https://github.com/cloudflare/wildebeest/tree/main/migrations
+object Actor extends Actor with StringKeyedMetaMapper[Actor] {
 
-  def defined_? = i_is_! != defaultValue
-  override def dbPrimaryKey_? = true
+  /** The regular expression for the id
+    */
+  val idPattern: Regex = "^([^@]+)@(.+)$".r
 
-  override def defaultValue = Helpers.nextFuncName
+  def unapply(key: String): Option[Actor] =
+    findByKey(key.toLowerCase())
 
-  override def setFilter: List[String => String] =
-    trim _ :: toLower _ :: super.setFilter
+  def buildActorIRI(actor: Actor): String =
+    f"https://${actor.theDomain}/${Constants.ActorBaseURI}/${URLEncoder.encode(actor.userName, StandardCharsets.UTF_8.toString())}"
 
-  override def dbIndexFieldIndicatesSaved_? = { i_is_! != defaultValue }
+  override def afterSchemifier: Unit = {
+    super.afterSchemifier
 
-  override def dbDisplay_? = false
-
-  override def fieldCreatorString(dbType: DriverType, colName: String): String =
-    colName + " TEXT NOT NULL"
-
-  override def convertKey(in: String): Box[String] = in match {
-    case null                 => Empty
-    case x if x.length() == 0 => Empty
-    case x                    => Full(x.toLowerCase())
+    if (/*Props.testMode &&*/ findByKey("test@localhost").isEmpty) {
+      Actor
+        .createActor("test@localhost", "test@localhost")
+        .openOrThrowException("Shouldn't fail")
+        .save
+      logger.info("Added user 'test'")
+    }
   }
 
-  override def convertKey(in: Int): Box[String] = convertKey(in.toString())
+  def createActor(
+      userName: String,
+      email: String,
+      actorType: ActorClass.ActorType = ActorClass.Person
+  ): Box[Actor] = {
+    val keyPair = CryptoUtil.generateKeyPair()
 
-  override def convertKey(in: Long): Box[String] = convertKey(in.toString())
+    val ret = Actor.create
+      .id(userName.toLowerCase().trim())
+      .email(email)
+      .theType(actorType)
+      .pubkey(CryptoUtil.keyBytesToPrettyText(keyPair.getPublic().getEncoded()))
+      .privkeySalt(Helpers.hash256(Helpers.randomString(500)))
+      .privkey(
+        CryptoUtil.keyBytesToPrettyText(keyPair.getPrivate().getEncoded())
+      )
 
-  override def convertKey(in: AnyRef): Box[String] = in match {
-    case null => Empty
-    case x    => convertKey(x.toString())
-  }
+    ret.validate match {
+      case Nil => Full(ret)
+      case msg => Failure(msg.map(_.toString()).mkString(", "))
+    }
 
-  override def makeKeyJDBCFriendly(in: String): AnyRef = in
-
-}
-
-trait BaseStringKeyedMapper extends BaseKeyedMapper {
-  override type TheKeyType = String
-}
-
-trait StringKeyedMapper[OwnerType <: StringKeyedMapper[OwnerType]]
-    extends KeyedMapper[String, OwnerType]
-    with BaseStringKeyedMapper {
-  self: OwnerType =>
-}
-
-trait StringIdPK {
-  self: BaseStringKeyedMapper =>
-  def primaryKeyField: MappedStringIndex[MapperType] = id
-  object id
-      extends MappedStringIndex[MapperType](
-        this.asInstanceOf[MapperType],
-        DBConsts.primaryKeyLen
-      ) {}
-}
-
-trait StringKeyedMetaMapper[A <: StringKeyedMapper[A]]
-    extends KeyedMetaMapper[String, A] { self: A => }
-
-object Actor extends Actor with StringKeyedMetaMapper[Actor] {}
-
-trait Properties {
-  self: BaseMapper =>
-
-  object properties
-      extends MappedJson[MapperType](this.asInstanceOf[MapperType]) {
-    override def dbNotNull_? = true
-    override def defaultValue: String = "{}"
   }
 }
 
@@ -130,9 +110,9 @@ class Actor
     with UpdatedTrait
     with CreatedTrait
     with Properties {
-  private lazy val logger = Logger(classOf[Actor])
+  protected lazy val logger = Logger(classOf[Actor])
   def getSingleton = Actor
-  object theType extends MappedText(this) {
+  object theType extends MappedEnum(this, ActorClass) {
     override def dbNotNull_? : Boolean = true
     override def dbColumnName: String = "type"
   }
@@ -143,6 +123,44 @@ class Actor
   }
   object pubkey extends MappedText(this)
 
+  override def validate: List[FieldError] = validateID() ::: super.validate
+
+  def validateID(): List[FieldError] = {
+    id.get match {
+      case null => List(FieldError(id, "id may not be null"))
+      case Actor.idPattern(_, domain) =>
+        if (Constants.Hostnames.contains(domain)) Nil
+        else
+          List(
+            FieldError(
+              id,
+              f"The domain ${domain} is not in the set of domains for this server"
+            )
+          )
+      case s =>
+        List(
+          FieldError(
+            id,
+            f"The id ${s} does not match the pattern 'name@domain'"
+          )
+        )
+    }
+  }
+
+  def json: JObject = ???
+
+  lazy val theDomain: String = {
+    val name = id.get
+    val pos = name.indexOf("@")
+    name.substring(pos + 1)
+  }
+
+  lazy val userName: String = {
+    val name = id.get
+    val pos = name.indexOf("@")
+    name.substring(0, pos)
+  }
+
 }
 
 object ActorFollowing
@@ -151,7 +169,7 @@ object ActorFollowing
   override def dbIndexes: List[BaseIndex[ActorFollowing]] =
     UniqueIndex(actorId, targetActorId) :: super.dbIndexes
 
-    override def dbTableName: String = "actor_following"
+  override def dbTableName: String = "actor_following"
 }
 
 class ActorFollowing
