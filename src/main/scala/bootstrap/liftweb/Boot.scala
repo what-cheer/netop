@@ -105,7 +105,8 @@ object Boot {
       Schemifier.infoF _,
       Actor, ActorFollowing, Objects, InboxObjects, OutboxObjects,
       ActorNotifications, ActorFavourites, ActorReblogs,
-      ActorReplies, Clients, Subscriptions, 
+      ActorReplies, Clients, Subscriptions, ServerSettings, IdempotencyKeys,
+      NoteHashtags, ServerRules
     )
 
     LiftRules.supplementalHeaders.default.set(() => Nil)

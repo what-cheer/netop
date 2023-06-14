@@ -11,7 +11,11 @@ import java.util.Base64
 object Playground {
    val keyGen = KeyPairGenerator.getInstance("RSA")
    
-  def run(): Any = {
+def run() = {
+  List("foo" -> 33, "bar" -> List("dog" -> "cat"))
+}
+
+  def run1(): Any = {
     val BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
 val END_CERT = "-----END CERTIFICATE-----";
 val LINE_SEPARATOR = System.getProperty("line.separator");

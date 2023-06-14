@@ -45,6 +45,7 @@ import net.liftweb.util.FieldError
 import scala.util.matching.Regex
 import net.liftweb.common.Failure
 import net.liftweb.mapper.MappedEnum
+import org.h2.tools.Server
 
 object ActorClass extends Enumeration {
   type ActorType = Value
@@ -122,6 +123,10 @@ class Actor
     override def dbColumnName: String = "privkey_salt"
   }
   object pubkey extends MappedText(this)
+
+  object isAdmin extends MappedBoolean(this) {
+    override def dbColumnName: String = "is_admin"
+  }
 
   override def validate: List[FieldError] = validateID() ::: super.validate
 
@@ -256,6 +261,44 @@ class Objects
   object local extends MappedBoolean(this)
 
 }
+
+object IdempotencyKeys extends IdempotencyKeys with StringKeyedMetaMapper[IdempotencyKeys] {
+  override def dbTableName = "idempotency_keys"
+}
+
+class IdempotencyKeys extends StringKeyedMapper[IdempotencyKeys] with StringIdPK with CreatedTrait {
+
+  override def getSingleton: KeyedMetaMapper[String,IdempotencyKeys] = IdempotencyKeys
+
+  object objectId extends MappedStringForeignKey(this, Objects, DBConsts.primaryKeyLen) {
+
+    override def foreignMeta: KeyedMetaMapper[String,Objects] = Objects
+   override def dbColumnName: String =  "object_id" 
+  }
+
+  object expiresAt extends MappedDateTime(this) {
+    override def dbNotNull_? = true
+    override def dbColumnName: String = "expires_at"
+  }
+}
+
+object NoteHashtags extends NoteHashtags with MetaMapper[NoteHashtags] {
+
+}
+
+class NoteHashtags extends Mapper[NoteHashtags] with CreatedTrait {
+
+  override def getSingleton: MetaMapper[NoteHashtags] = NoteHashtags
+  object objectId extends MappedStringForeignKey(this, Objects, DBConsts.primaryKeyLen) {
+
+    override def foreignMeta: KeyedMetaMapper[String,Objects] = Objects
+   override def dbColumnName: String =  "object_id" 
+  }
+
+  object value extends MappedText(this)
+  
+}
+
 
 object InboxObjects
     extends InboxObjects
@@ -586,6 +629,35 @@ class Peers extends Mapper[Peers] {
 
   }
 }
+
+object ServerSettings extends ServerSettings with MetaMapper[ServerSettings] {
+
+}
+
+class ServerSettings extends Mapper[ServerSettings] {
+
+  override def getSingleton: MetaMapper[ServerSettings] = ServerSettings
+
+
+  
+  object settingName extends MappedText(this)
+  object settingValue extends MappedText(this)
+}
+
+object ServerRules extends ServerRules with LongKeyedMetaMapper[ServerRules] {
+
+}
+
+class ServerRules extends LongKeyedMapper[ServerRules] with IdPK {
+
+  override def getSingleton: KeyedMetaMapper[Long,ServerRules] = ServerRules
+
+  object text extends MappedText(this)
+  
+}
+
+
+
 /*
 
 
