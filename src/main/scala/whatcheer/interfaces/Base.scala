@@ -1,5 +1,9 @@
 package whatcheer.interfaces
 
+import whatcheer.utils.JsonData
+import whatcheer.utils.HasProperties
+import net.liftweb.json.JsonAST
+
 object Base {
   type URL = String
   type UUID = String
@@ -25,11 +29,13 @@ case class APObject(
 
     // Extension
     preferredUsername: Option[String]
-) {
+) extends JsonData with HasProperties {
   // Internal
   private var originalActorIdSymbol: Option[String] = None
   private var originalObjectIdSymbol: Option[String] = None
   private var mastodonIdSymbol: Option[UUID] = None
+
+  var theProperties: JsonAST.JValue = JsonAST.JNull
 }
 
 // https://www.w3.org/TR/activitystreams-vocabulary/#actor-types

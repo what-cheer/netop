@@ -8,7 +8,8 @@ import java.util.HashMap
 import com.github.jsonldjava.core.JsonLdOptions
 import com.github.jsonldjava.core.JsonLdProcessor
 import net.liftweb.json.JsonAST
-import net.liftweb.json.JsonAST.JObject
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 object JsonLD {
   private def loadFromResources(name: String): Object = {
@@ -67,6 +68,13 @@ object JsonLD {
             JsonAST.JArray(
               List(
                 JsonAST.JString("https://www.w3.org/ns/activitystreams"),
+                ("ostatus" -> "http://ostatus.org#") ~
+                  ("atomUri" -> "ostatus:atomUri") ~
+                  ("inReplyToAtomUri" -> "ostatus:inReplyToAtomUri") ~
+                  ("conversation" -> "ostatus:conversation") ~
+                  ("sensitive" -> "as:sensitive") ~
+                  ("toot" -> "http://joinmastodon.org/ns#") ~
+                  ("votersCount" -> "toot:votersCount"),
                 JsonAST.JString("https://w3id.org/security/v1")
               )
             )
@@ -74,12 +82,20 @@ object JsonLD {
         )
 
       // create a new JObject with context
-      case jv => JObject(
+      case jv =>
+        JObject(
           JsonAST.JField(
             "@context",
             JsonAST.JArray(
               List(
                 JsonAST.JString("https://www.w3.org/ns/activitystreams"),
+                ("ostatus" -> "http://ostatus.org#") ~
+                  ("atomUri" -> "ostatus:atomUri") ~
+                  ("inReplyToAtomUri" -> "ostatus:inReplyToAtomUri") ~
+                  ("conversation" -> "ostatus:conversation") ~
+                  ("sensitive" -> "as:sensitive") ~
+                  ("toot" -> "http://joinmastodon.org/ns#") ~
+                  ("votersCount" -> "toot:votersCount"),
                 JsonAST.JString("https://w3id.org/security/v1")
               )
             )
@@ -101,3 +117,33 @@ case class JsonLDHolder(jsonld: Object)
   * @param json
   */
 case class ParsedJsonHolder(json: Object)
+
+trait JsonData {
+  import net.liftweb.json._
+  import net.liftweb.json.Serialization.{read, write}
+  import JsonData._
+
+  def toJson(): JValue = {
+    val ret = Extraction.decompose(this)(formats)
+
+    this match {
+      case x: HasProperties =>
+        (ret, x.theProperties) match {
+          case (x, JNull) => x
+          case (x, JNothing) => x
+          case (JObject(jo), JObject(j2)) => JObject(jo ::: j2)
+          case (JObject(jo), other) => JObject(jo ::: List(JField("properties", other)))
+          case (x, y) => ("object" -> x) ~ ("properties" -> y)
+        }
+        case _ => ret
+    }
+  }
+}
+
+object JsonData {
+  implicit val formats = net.liftweb.json.DefaultFormats
+}
+
+trait HasProperties {
+  def theProperties: JValue 
+}

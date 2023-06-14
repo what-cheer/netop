@@ -46,6 +46,7 @@ import scala.util.matching.Regex
 import net.liftweb.common.Failure
 import net.liftweb.mapper.MappedEnum
 import org.h2.tools.Server
+import whatcheer.interfaces.APObject
 
 object ActorClass extends Enumeration {
   type ActorType = Value
@@ -260,6 +261,12 @@ class Objects
   }
   object local extends MappedBoolean(this)
 
+  def asJsonInterface(): APObject = {
+    // FIXME -- extract more info... likely from properties
+    val ret = APObject(theType.get, id.get, id.get, None, None, None, None, None, None, None, None, None)
+ret.theProperties = properties.getJson().openOr(JNull)
+    ret
+  }
 }
 
 object IdempotencyKeys extends IdempotencyKeys with StringKeyedMetaMapper[IdempotencyKeys] {
