@@ -135,3 +135,19 @@ trait Properties {
     override def defaultValue: String = "{}"
   }
 }
+
+trait IdPlusDomainHandler {
+  self: StringIdPK =>
+  lazy val idAndDomain: (String, String) = {
+    val x = this.id.get
+    val pos = x.indexOf("@")
+    if (pos == -1) (x -> "")
+    else {
+      (x.substring(0, pos) -> x.substring(pos + 1))
+    }
+  }
+
+  def urlFromIdAndDomain(id: String, domain: String): String
+
+  lazy val urlForThis: String = urlFromIdAndDomain(idAndDomain._1, idAndDomain._2)
+}

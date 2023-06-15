@@ -46,7 +46,8 @@ import scala.util.matching.Regex
 import net.liftweb.common.Failure
 import net.liftweb.mapper.MappedEnum
 import org.h2.tools.Server
-import whatcheer.interfaces.APObject
+import whatcheer.interfaces.{APObject, Actor => IActor}
+import whatcheer.interfaces.PublicKey
 
 object ActorClass extends Enumeration {
   type ActorType = Value
@@ -54,20 +55,18 @@ object ActorClass extends Enumeration {
   val Person = Value(1, "person")
 }
 
-
-
 // Schemas in this file are ports from https://github.com/cloudflare/wildebeest/tree/main/migrations
 object Actor extends Actor with StringKeyedMetaMapper[Actor] {
 
   /** The regular expression for the id
     */
-  val idPattern: Regex = "^([^@]+)@(.+)$".r
+  val idPattern: Regex = "^@?([^@]+)@(.+)$".r
 
-  def unapply(key: String): Option[Actor] =
-    findByKey(key.toLowerCase())
+  // def unapply(key: String): Option[Actor] =
+  //   findByKey(key.toLowerCase())
 
-  def buildActorIRI(actor: Actor): String =
-    f"https://${actor.theDomain}/${Constants.ActorBaseURI}/${URLEncoder.encode(actor.userName, StandardCharsets.UTF_8.toString())}"
+  // def buildActorIRI(actor: Actor): String =
+  //   f"https://${actor.theDomain}/${Constants.ActorBaseURI}/${URLEncoder.encode(actor.userName, StandardCharsets.UTF_8.toString())}"
 
   override def afterSchemifier: Unit = {
     super.afterSchemifier
@@ -111,6 +110,7 @@ class Actor
     with StringIdPK
     with UpdatedTrait
     with CreatedTrait
+    with IdPlusDomainHandler
     with Properties {
   protected lazy val logger = Logger(classOf[Actor])
   def getSingleton = Actor
@@ -153,8 +153,6 @@ class Actor
     }
   }
 
-  def json: JObject = ???
-
   lazy val theDomain: String = {
     val name = id.get
     val pos = name.indexOf("@")
@@ -167,6 +165,42 @@ class Actor
     name.substring(0, pos)
   }
 
+  def urlFromIdAndDomain(id: String, domain: String): String =
+    f"https://${domain.trim().toLowerCase()}/users/${id.trim().toLowerCase()}"
+
+  def inboxUrl: String = urlForThis + "inbox"
+  def outboxUrl: String = urlForThis + "outbox"
+  def followingUrl: String = urlForThis + "following"
+  def followersUrl: String = urlForThis + "followers"
+
+  def publicKeyObject: PublicKey =
+    PublicKey(urlForThis + "#main-key", urlForThis, pubkey.get)
+
+  def asJsonInterface(): IActor = {
+    
+    val ret = IActor(
+      theType.get.toString(),
+      id.get,
+      this.urlForThis,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      this.inboxUrl,
+      this.outboxUrl,
+      this.followingUrl,
+      this.followersUrl,
+      None,
+      Some(this.publicKeyObject)
+    )
+
+    ret.theProperties = properties.getJson().openOr(JNull)
+    ret
+  }
 }
 
 object ActorFollowing
@@ -224,6 +258,7 @@ class Objects
     with StringIdPK
     with UpdatedTrait
     with CreatedTrait
+    with IdPlusDomainHandler
     with Properties {
   private lazy val logger = Logger(classOf[Objects])
   def getSingleton = Objects
@@ -261,26 +296,49 @@ class Objects
   }
   object local extends MappedBoolean(this)
 
+  def urlFromIdAndDomain(id: String, domain: String): String =
+    f"https://${domain.trim().toLowerCase()}/ap/o/${id.trim().toLowerCase()}"
+
   def asJsonInterface(): APObject = {
     // FIXME -- extract more info... likely from properties
-    val ret = APObject(theType.get, id.get, id.get, None, None, None, None, None, None, None, None, None)
-ret.theProperties = properties.getJson().openOr(JNull)
+    val ret = APObject(
+      theType.get,
+      id.get,
+      urlForThis,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None
+    )
+    ret.theProperties = properties.getJson().openOr(JNull)
     ret
   }
 }
 
-object IdempotencyKeys extends IdempotencyKeys with StringKeyedMetaMapper[IdempotencyKeys] {
+object IdempotencyKeys
+    extends IdempotencyKeys
+    with StringKeyedMetaMapper[IdempotencyKeys] {
   override def dbTableName = "idempotency_keys"
 }
 
-class IdempotencyKeys extends StringKeyedMapper[IdempotencyKeys] with StringIdPK with CreatedTrait {
+class IdempotencyKeys
+    extends StringKeyedMapper[IdempotencyKeys]
+    with StringIdPK
+    with CreatedTrait {
 
-  override def getSingleton: KeyedMetaMapper[String,IdempotencyKeys] = IdempotencyKeys
+  override def getSingleton: KeyedMetaMapper[String, IdempotencyKeys] =
+    IdempotencyKeys
 
-  object objectId extends MappedStringForeignKey(this, Objects, DBConsts.primaryKeyLen) {
+  object objectId
+      extends MappedStringForeignKey(this, Objects, DBConsts.primaryKeyLen) {
 
-    override def foreignMeta: KeyedMetaMapper[String,Objects] = Objects
-   override def dbColumnName: String =  "object_id" 
+    override def foreignMeta: KeyedMetaMapper[String, Objects] = Objects
+    override def dbColumnName: String = "object_id"
   }
 
   object expiresAt extends MappedDateTime(this) {
@@ -289,23 +347,21 @@ class IdempotencyKeys extends StringKeyedMapper[IdempotencyKeys] with StringIdPK
   }
 }
 
-object NoteHashtags extends NoteHashtags with MetaMapper[NoteHashtags] {
-
-}
+object NoteHashtags extends NoteHashtags with MetaMapper[NoteHashtags] {}
 
 class NoteHashtags extends Mapper[NoteHashtags] with CreatedTrait {
 
   override def getSingleton: MetaMapper[NoteHashtags] = NoteHashtags
-  object objectId extends MappedStringForeignKey(this, Objects, DBConsts.primaryKeyLen) {
+  object objectId
+      extends MappedStringForeignKey(this, Objects, DBConsts.primaryKeyLen) {
 
-    override def foreignMeta: KeyedMetaMapper[String,Objects] = Objects
-   override def dbColumnName: String =  "object_id" 
+    override def foreignMeta: KeyedMetaMapper[String, Objects] = Objects
+    override def dbColumnName: String = "object_id"
   }
 
   object value extends MappedText(this)
-  
-}
 
+}
 
 object InboxObjects
     extends InboxObjects
@@ -637,33 +693,25 @@ class Peers extends Mapper[Peers] {
   }
 }
 
-object ServerSettings extends ServerSettings with MetaMapper[ServerSettings] {
-
-}
+object ServerSettings extends ServerSettings with MetaMapper[ServerSettings] {}
 
 class ServerSettings extends Mapper[ServerSettings] {
 
   override def getSingleton: MetaMapper[ServerSettings] = ServerSettings
 
-
-  
   object settingName extends MappedText(this)
   object settingValue extends MappedText(this)
 }
 
-object ServerRules extends ServerRules with LongKeyedMetaMapper[ServerRules] {
-
-}
+object ServerRules extends ServerRules with LongKeyedMetaMapper[ServerRules] {}
 
 class ServerRules extends LongKeyedMapper[ServerRules] with IdPK {
 
-  override def getSingleton: KeyedMetaMapper[Long,ServerRules] = ServerRules
+  override def getSingleton: KeyedMetaMapper[Long, ServerRules] = ServerRules
 
   object text extends MappedText(this)
-  
+
 }
-
-
 
 /*
 

@@ -15,7 +15,7 @@ case class APObject(
     `type`: String,
     // ObjectId, URL used for federation. Called `uri` in Mastodon APIs.
     // https://www.w3.org/TR/activitypub/#obj-id
-    id: URL,
+    id: String,
     // Link to the HTML representation of the object
     url: URL,
     published: Option[String],
@@ -60,9 +60,11 @@ case class Actor(
     followers: URL,
     alsoKnownAs: Option[String],
     publicKey: Option[PublicKey]
-) {
+) extends JsonData with HasProperties {
   var emailSymbol: Option[String] = None
   var isAdminSymbol: Boolean = false
+
+  var theProperties: JsonAST.JValue = JsonAST.JNull
 }
 
 case class PublicKey(

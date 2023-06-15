@@ -28,7 +28,7 @@ class WebFingerTest extends munit.FunSuite {
     assertEquals(json \ "subject", JsonAST.JString("acct:test@localhost"))
     assertEquals(
       (json \ "links")(0) \ "href",
-      JsonAST.JString(Actor.buildActorIRI(testActor.openOrThrowException("Already tested")))
+      JsonAST.JString(testActor.openOrThrowException("Already tested").urlForThis)
     )
   }
 

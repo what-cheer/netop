@@ -21,8 +21,6 @@ import whatcheer.schemas.Actor
 import whatcheer.utils.JsonData
 import whatcheer.utils.MiscUtil
 
-
-
 object MainRoutes extends RestHelper {
   serve {
     case ".well-known" :: "webfinger" :: Nil Get req =>
@@ -41,11 +39,14 @@ object MainRoutes extends RestHelper {
     case Constants.NodeInfoURI :: version :: Nil Get _ =>
       NodeInfo.getNodeInfo(version)
 
-    case "ap" :: "o" :: id :: Nil Get req => () => ObjectLogic.serveObject(id, req.hostName)
+    case "ap" :: "o" :: id :: Nil Get req =>
+      () => ObjectLogic.serveObject(id, req.hostName)
 
-    case "ap" :: "users" :: id :: Nil Get _                 => ???
-    case "ap" :: "users" :: id :: "inbox" :: Nil Get _      => ???
-    case "ap" :: "users" :: id :: "followers" :: rest Get _ => ???
+    case "ap" :: "users" :: id :: Nil Get req =>
+      () => ActorLogic.serveActor(id, req.hostName)
+    case "ap" :: "users" :: id :: "inbox" :: Nil Get _ => ???
+    case "ap" :: "users" :: id :: "followers" :: rest Get req =>
+      () => ActorLogic.serveFollowers(id, req.hostName, rest)
     case "ap" :: "users" :: id :: "following" :: rest Get _ => ???
     case "ap" :: "users" :: id :: "outbox" :: rest Get _    => ???
 
@@ -113,9 +114,25 @@ object MainRoutes extends RestHelper {
     }
   }
 
-  implicit def jsonDataLiftResponse(in: Box[(JsonData, MiscUtil.Headers)]): Box[LiftResponse] = {
+  implicit def jsonDataLiftResponse(
+      in: Box[(JsonData, MiscUtil.Headers)]
+  ): Box[LiftResponse] = {
     in match {
-      case Full(jd -> headers) => Full(JsonResponse(jd.toJson(), headers, Nil, 200))
+      case Full(jd -> headers) =>
+        Full(JsonResponse(jd.toJson(), headers, Nil, 200))
+      case ParamFailure(msg, _, _, code: Int) =>
+        Full(PlainTextResponse(msg, code))
+      case Failure(msg, _, _) => Full(PlainTextResponse(msg, 404))
+      case _                  => Empty
+    }
+  }
+
+  implicit def jsonToLiftResponse(
+      in: Box[(JValue, MiscUtil.Headers)]
+  ): Box[LiftResponse] = {
+    in match {
+      case Full(jd -> headers) =>
+        Full(JsonResponse(jd, headers, Nil, 200))
       case ParamFailure(msg, _, _, code: Int) =>
         Full(PlainTextResponse(msg, code))
       case Failure(msg, _, _) => Full(PlainTextResponse(msg, 404))
