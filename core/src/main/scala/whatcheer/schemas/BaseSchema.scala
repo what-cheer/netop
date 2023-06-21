@@ -168,6 +168,9 @@ class Actor
   def urlFromIdAndDomain(id: String, domain: String): String =
     f"https://${domain.trim().toLowerCase()}/users/${id.trim().toLowerCase()}"
 
+  def htmlUrlFromIdAndDomain(id: String, domain: String): String =
+    f"https://${domain.trim().toLowerCase()}/@${id.trim().toLowerCase()}"
+
   def inboxUrl: String = urlForThis + "inbox"
   def outboxUrl: String = urlForThis + "outbox"
   def followingUrl: String = urlForThis + "following"
@@ -177,11 +180,11 @@ class Actor
     PublicKey(urlForThis + "#main-key", urlForThis, pubkey.get)
 
   def asJsonInterface(): IActor = {
-    
+
     val ret = IActor(
       theType.get.toString(),
-      id.get,
-      this.urlForThis,
+      urlForThis,
+      htmlUrlForThis,
       None,
       None,
       None,
@@ -299,6 +302,9 @@ class Objects
   def urlFromIdAndDomain(id: String, domain: String): String =
     f"https://${domain.trim().toLowerCase()}/ap/o/${id.trim().toLowerCase()}"
 
+      def htmlUrlFromIdAndDomain(id: String, domain: String): String =
+    f"https://${domain.trim().toLowerCase()}/ap/o/${id.trim().toLowerCase()}"
+
   def asJsonInterface(): APObject = {
     // FIXME -- extract more info... likely from properties
     val ret = APObject(
@@ -318,6 +324,8 @@ class Objects
     ret.theProperties = properties.getJson().openOr(JNull)
     ret
   }
+
+
 }
 
 object IdempotencyKeys

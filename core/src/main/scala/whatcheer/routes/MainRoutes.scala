@@ -20,6 +20,7 @@ import whatcheer.utils.JsonLD
 import whatcheer.schemas.Actor
 import whatcheer.utils.JsonData
 import whatcheer.utils.MiscUtil
+import whatcheer.macros
 
 object MainRoutes extends RestHelper {
   serve {
@@ -119,7 +120,7 @@ object MainRoutes extends RestHelper {
   ): Box[LiftResponse] = {
     in match {
       case Full(jd -> headers) =>
-        Full(JsonResponse(jd.toJson(), headers, Nil, 200))
+         Full(JsonResponse(jd.toJson(), headers, Nil, 200))
       case ParamFailure(msg, _, _, code: Int) =>
         Full(PlainTextResponse(msg, code))
       case Failure(msg, _, _) => Full(PlainTextResponse(msg, 404))

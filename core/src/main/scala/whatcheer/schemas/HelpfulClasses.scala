@@ -149,5 +149,9 @@ trait IdPlusDomainHandler {
 
   def urlFromIdAndDomain(id: String, domain: String): String
 
+  def htmlUrlFromIdAndDomain(id: String, domain: String): String
+
   lazy val urlForThis: String = urlFromIdAndDomain(idAndDomain._1, idAndDomain._2)
+
+  lazy val htmlUrlForThis: String = htmlUrlFromIdAndDomain(idAndDomain._1, idAndDomain._2)
 }
