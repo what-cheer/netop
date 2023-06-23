@@ -7,7 +7,7 @@ import com.github.jsonldjava.core.JsonLdOptions
 import com.github.jsonldjava.core.JsonLdProcessor
 import java.security.KeyPairGenerator
 import java.util.Base64
-import whatcheer.schemas.Schemas
+// import whatcheer.schemas.Schemas
 
 case class DogMeat(var a: Int,var b: Option[String] = None,var c: Option[Int] = None) {
   def a(i: Int): DogMeat = {
@@ -30,7 +30,7 @@ object Playground {
   val keyGen = KeyPairGenerator.getInstance("RSA")
 
 def run() = {
-Schemas.doIt()
+// Schemas.doIt()
 }
 
   def run33() = {
