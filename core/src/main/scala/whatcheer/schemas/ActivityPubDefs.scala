@@ -23,7 +23,7 @@ object Schemas {
       avatar_static: String,
       header: String,
       header_static: String,
-      created_at: String,
+      created_at: ADate,
       locked: Boolean_?,
       bot: Boolean_?,
       discoverable: Boolean_?,
@@ -44,15 +44,6 @@ object Schemas {
     val _union_ = List("public", "unlisted", "private", "direct")
   }
 
-  object CredentialAccount extends Jsonifyable {
-
-    val _fields_ = (
-      M(MastodonAccount),
-      source: Source,
-      role: Role
-    )
-  }
-
   object Source extends Jsonifyable {
     val _fields_ = (
       note: String,
@@ -61,6 +52,15 @@ object Schemas {
       sensitive: Boolean,
       language: String,
       follow_requests_count: Int
+    )
+  }
+
+  object CredentialAccount extends Jsonifyable {
+
+    val _fields_ = (
+      M(MastodonAccount),
+      source: Source,
+      role: Role
     )
   }
 
@@ -284,11 +284,11 @@ object Schemas {
   object NotificationsQueryResult extends Jsonifyable {
     val _fields_ = (
       M(ObjectsRow),
-      `type`: NotificationType,
-      original_actor_id: URL,
-      notif_from_actor_id: URL,
-      notif_cdate: String,
-      notif_id: URL,
+      (`type`: NotificationType, NotificationType_mention),
+      original_actor_id: URL_?,
+      notif_from_actor_id: URL_?,
+      notif_cdate: ADate,
+      notif_id: URL_?,
       from_actor_id: String
     )
   }

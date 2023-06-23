@@ -7,20 +7,25 @@ import com.github.jsonldjava.core.JsonLdOptions
 import com.github.jsonldjava.core.JsonLdProcessor
 import java.security.KeyPairGenerator
 import java.util.Base64
-// import whatcheer.schemas.Schemas
+import whatcheer.schemas.Schemas._
+import java.net.URL
 
-case class DogMeat(var a: Int,var b: Option[String] = None,var c: Option[Int] = None) {
+case class DogMeat(
+    var a: Int,
+    var b: Option[String] = None,
+    var c: Option[Int] = None
+) {
   def a(i: Int): DogMeat = {
     this.a = i
     this
   }
 
-    def b(i: String): DogMeat = {
+  def b(i: String): DogMeat = {
     this.b = Some(i)
     this
   }
 
-      def b(i: Option[String]): DogMeat = {
+  def b(i: Option[String]): DogMeat = {
     this.b = i
     this
   }
@@ -29,9 +34,19 @@ case class DogMeat(var a: Int,var b: Option[String] = None,var c: Option[Int] = 
 object Playground {
   val keyGen = KeyPairGenerator.getInstance("RSA")
 
-def run() = {
-// Schemas.doIt()
-}
+  def run() = {
+    var x: Privacy = Privacy_public
+    x match {
+      case Privacy_direct =>
+    }
+
+    val m = MastodonAccount()
+    m.created_at.getEpochSecond()
+
+    val q = NotificationsQueryResult(
+      id = new URL("https://example.com"),
+    )
+  }
 
   def run33() = {
     // BullBear.bar()
@@ -41,7 +56,7 @@ def run() = {
     a.b = Some("Hello")
 
     a.a(99).b("meow")
-    (a,b)
+    (a, b)
 
   }
 

@@ -806,7 +806,7 @@ object JsonifyMacro {
     }
 
     object UUIDTypeInfo extends TypeInfoClass {
-      def defaultValue: Option[Tree] = None
+      def defaultValue: Option[Tree] = Some(q"java.util.UUID.randomUUID()")
       def renderFieldConstructor(toRender: Tree, priv: Boolean): Tree =
         q"""JString(whatcheer.macros.support.RendererAndParser.uuidToString(${toRender})) """
       def underlyingType: Tree = tq"java.util.UUID"
